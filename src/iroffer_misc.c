@@ -374,7 +374,14 @@ void vwriteserver(writeserver_type_e type, const char *format, va_list ap)
       len++;
       msg[len] = '\0';
       writeserver_ssl(msg, len);
-      gnetwork->serverbucket -= len;
+      if ( len > gnetwork->serverbucket )
+        {
+          gnetwork->serverbucket = 0;
+        }
+      else
+        {
+          gnetwork->serverbucket -= len;
+        }
     }
   else if (gdata.exiting || (gnetwork->serverstatus != SERVERSTATUS_CONNECTED))
     {
@@ -1340,7 +1347,8 @@ char* getstatuslinenums(char *str, size_t len)
                gdata.slotsmax,
                irlist_size(&gdata.mainqueue),
                gdata.queuesize,
-               0, 0,
+               irlist_size(&gdata.idlequeue),
+               gdata.idlequeuesize,
                gdata.record,
                srvq,
                xdccsent/1024,
